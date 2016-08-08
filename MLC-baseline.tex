@@ -1,0 +1,206 @@
+\documentclass[review]{elsarticle}
+
+\usepackage{graphicx,subfigure}
+\usepackage{amssymb,amsmath,bm}
+\usepackage{algorithm,algpseudocode}
+\usepackage{url,hyperref}
+\usepackage{epstopdf}
+
+\usepackage{lineno}
+
+\newcommand{\argmin}{\operatornamewithlimits{argmin}}
+\newcommand{\argmax}{\operatornamewithlimits{argmax}}
+
+\biboptions{sort&compress}
+
+
+\journal{Pattern Recognition}
+
+\begin{document}
+
+\begin{frontmatter}
+
+\title{The worst multi-label classifier: an objective baseline}
+
+\author[Warwick,UCL]{Sherman~Ip}
+\ead{S.Ip@warwick.ac.uk}
+\author[UCL]{Miguel Valencia-Garza}
+\ead{m.garza.12@ucl.ac.uk}
+\author[UCL]{Jing-Hao Xue\corref{corr}}
+\ead{jinghao.xue@ucl.ac.uk}
+\cortext[corr]{Corresponding author. Tel.: +44-20-7679-1863; Fax: +44-20-3108-3105}
+
+\address[Warwick]{Department of Statistics, University of Warwick, Coventry CV4 7AL, UK}
+\address[UCL]{Department of Statistical Science, University College London, London WC1E 6BT, UK}
+
+\begin{abstract}
+{\bf Jing-Hao to draft.} In this short paper, we propose an objective baseline classifier for the evaluation and comparison of multi-label classifiers.  We call this baseline the worst multi-label classifier.  This classifier predicts the labels of test instances by random guess, based only on the summary statistics from the labels in the training set.  To evaluate a multi-label classifier, we propose a simple nonparametric permutation test to indicate how significant the classifier is far away from (two-sided) or better than (one-side) than the worst classifier, {\bf Seems better to use `better than' given it is compared with the 'worst'} in terms of the Hamming loss and the subset 0/1 loss, two of the most popular measures of loss in multi-label classification.  For illustration, we also present some empirical examples of utilising the significance test on several benchmark datasets and popular multi-label classifiers. {\bf BR+NB, BR+logistic, chain classifier+NB, chain classifier+logistic, versus the worst classifier?}
+\end{abstract}
+
+\begin{keyword}
+Multi-label classification\sep worst multi-label classifier\sep objective baseline\sep classifier comparison
+\end{keyword}
+
+\end{frontmatter}
+
+\linenumbers
+
+
+\section{Introduction}\label{s:intro}
+
+{\bf Jing-Hao to draft.}
+
+{\bf Importance of multi-label classification.}
+Different from bi-class or multi-class classification in which each instance is only categorised into a single class, multi-label classification assigns more than one label to an instance, that is, an instance can belong to many classes simultaneously.  Many multi-label classifiers have been developed for a large number of applications in pattern recognition~\citep{Tsoumakas:07, de2009tutorial, zhang2014review, Gibaja:15, wu2015multi, zhao2015multi, zhao2015joint, li2015supervised, li2015centroid, meng2016plant, li2016conditional, hou2016multi, ivasic2016two, yang2016exploiting}.  
+
+{\bf Importance of an objective baseline.}
+However, in most if not all papers developing or comparing multi-label classifiers, different sets of established multi-label classifiers are subjectively chosen as benchmark and compared with each other.  As far as we know, there still lacks of an objective baseline, which is below all established multi-label classifiers in terms of classification performance.
+
+{\bf To propose the baseline.}
+Therefore, in this short paper, we {\em propose} an objective baseline classifier for the evaluation and comparison of multi-label classifiers.  We call this baseline the worst multi-label classifier.  This classifier predicts the labels of test instances by random guess, based only on the summary statistics from the labels in the training set.  To have some insight of this classifier, we shall derive some theoretical properties of it performance, in terms of the Hamming loss and the subset 0/1 loss, two of the most popular measures adopted in multi-label classification.
+
+{\bf To propose the permutation test.}
+To evaluate a multi-label classifier, we can compare its performance against the worst classifier.  Considering the sampling randomness of the test data, we opt for statistical hypothesis testing, with the null hypothesis being the model underlying the worst classifier.  In this way, we can statistically test how significant the classifier is far away from (two-sided) or better than (one-side) than the worst classifier, {\bf Seems better to use `better than' given it is compared with the 'worst'} in terms of the Hamming loss and the subset 0/1 loss.  (There is no difficulty to generalise this to any other types of loss.)  As it is not ready to derive the probability distribution of the losses or to perfectly approximate it by some known standard parametric families of probability distributions, we {\em propose} a simple nonparametric permutation test to produce $p$-values.  
+
+{\bf To validate the work in this paper.}
+For illustration, we also present some empirical examples of utilising the significance test on several benchmark datasets and popular multi-label classifiers. {\bf BR+NB, BR+logistic, chain classifier+NB, chain classifier+logistic, versus the worst classifier?}
+
+{\bf A summary of contribution of this paper.}
+In short, this paper proposes a new and objective baseline multi-label classifier; it also proposes a a simple nonparametric permutation test to produce $p$-values to indicate the significance of the superiority of a classifier against the proposed baseline.  
+
+
+\section{The worst classifier}\label{s:worst}
+
+\subsection{Definition of the worst classifier}\label{ss:def}
+
+{\bf Drafted by Miguel.}
+
+The worst classifier predicts labels of previously unseen instances at random. For $q$ labels, the worst classifier model is
+\begin{equation}\label{WC}
+\hat{Y}^{(i)}_{j} \sim \mathrm{Bernoulli}(\phi_{j}), \quad j = 1,\ldots,q 
+\end{equation}
+This is, the $j$-th label of the $i$-th instance is predicted as positive (i.e. $y^{(i)}_{j}=1$) with probability $\phi_{j}$. Since the worst classifier predicts labels randomly, it is independent from predictors.
+
+A multi-label data set consists of a matrix of predictors $\mathbf{X} \in \Re^{n \times p}$ and a matrix of labels $\mathbf{Y} \in \{ 0,1 \}^{n \times q}$. We assume that the marginal distribution of each label is given by 
+\begin{equation}
+Y^{(i)}_{j} \sim \mathrm{Bernoulli}(\theta_{j}), \quad j = 1,\ldots,q 
+\end{equation}
+For $n$ observations the joint marginal distribution is $p(Y^{(1)}_{j},\ldots,Y^{(n)}_{j}) = \prod^{n}_{i=1}{Y^{(i)}_{j}}$. Then, the maximum likelihood estimator for $\theta_{j}$ is $\hat{\theta}_{j} = n^{-1} \sum^{n}_{i=1}{y^{(i)}_{j}}$. To make more ad hoc guesses we take $\phi_{j}$ in our worst classifier (\ref{WC}) equal to $\hat{\theta_{j}}$.
+
+
+\subsection{Mean and variance of the Hamming loss}\label{ss:Hamming}
+
+{\bf Drafted by Miguel.}
+
+For this paper, we focus on the Hamming loss to assess the performance of the worst classifier and carry out the comparisons with other multi-label classifiers. The Hamming loss is defined as
+\begin{equation}
+HL = \frac{1}{q} \sum^{q}_{j=1}{\mathbb{I} [\hat{Y}_{j} \neq Y_{j}]}
+\end{equation}
+where $\mathbb{I}[\cdot] = 1$ when its argument is true.
+
+For a new observation $\mathbf{x}^{*}$, the expected Hamming loss of the worst classifier is given by
+\begin{eqnarray*}
+\mu_{HL} &=& \mathbb{E}[HL] = \frac{1}{q} \mathbb{E} \left[ \sum^{q}_{j=1}{\mathbb{I} [\hat{Y}_{j} \neq Y_{j}]} \right] \\
+&=& \frac{1}{q} \mathbb{E} \left[ \sum^{q}_{j=1}{\mathbb{I} [(\hat{Y}^{*}_{j} = 1 \cap Y^{*}_{j} = 0) \cup (\hat{Y}^{*}_{j} = 0 \cap Y^{*}_{j} = 1) ]} \right] \\
+&=& \frac{1}{q} \sum^{q}_{j=1}{\mathbb{E} \left[ \mathbb{I} [(\hat{Y}^{*}_{j} = 1 \cap Y^{*}_{j} = 0) \cup (\hat{Y}^{*}_{j} = 0 \cap Y^{*}_{j} = 1) ] \right]} \\
+&=& \frac{1}{q} \sum^{q}_{j=1}{P(\hat{Y}^{*}_{j}=1,Y^{*}_{j}=0|\mathbf{x}^{*}) + P(\hat{Y}_{j}=0,Y_{j}=1|\mathbf{x}^{*})} \\
+& = & \frac{1}{q} \sum^{q}_{j=1}{P(\hat{Y}_{j}=1)P(Y_{j}=0|\mathbf{x}^{*}) + P(\hat{Y}_{j}=0)P(Y_{j}=1|\mathbf{x}^{*})}  \\
+&=& \frac{1}{q} \sum^{q}_{j=1} \phi_{j} (1 - \theta_{j}(\mathbf{x}^{*})) + (1 - \phi_{j})\theta_{j}(\mathbf{x}^{*}) \\
+&=&  \frac{1}{q} \sum^{q}_{j=1}{\theta_{j}(\mathbf{x}^{*}) + \phi_{j} - 2 \theta_{j}(\mathbf{x}^{*}) \phi_{j}}
+\end{eqnarray*}
+
+The parameter $\theta(\mathbf{x})$ comes from the conditional marginal of each label
+\begin{equation}
+Y^{(i)}_{j}| \mathbf{x}^{(i)} \sim \mathrm{Bernoulli}(\theta_{j}(\mathbf{x}^{(i)}))
+\end{equation}
+for all $j = 1,\ldots,q$.
+
+The variance of the worst classifier's Hamming loss is given by
+\begin{eqnarray*}
+\tau^{2}_{HL} &=& \mathrm{Var}(HL) = \frac{1}{q^{2}} \mathrm{Var} \left( \sum^{q}_{j=1}{\mathbb{I} [\hat{Y}_{j} \neq Y_{j}]} \right) \\
+&=& \frac{1}{q^{2}} \sum^{q}_{j=1}{\mathrm{Var} \left( \mathbb{I} [(\hat{Y}_{j} = 1 \cap Y_{j} = 0) \cup ((\hat{Y}_{j} = 1 \cap Y_{j} = 0)) ] \right)} \\
+&=& \frac{1}{q^{2}} \sum^{q}_{j=1}{\left( P(\hat{Y}_{j}=1,Y_{j}=0) + P(\hat{Y}_{j}=0,Y_{j}=1) \right) \left(1 - P(\hat{Y}_{j}=1,Y_{j}=0) - P(\hat{Y}_{j}=0,Y_{j}=1) \right)} \\
+&=& \frac{1}{q^{2}} \sum^{q}_{j=1}{\left(\phi_{j} (1 - \theta_{j}(\mathbf{x}^{*})) + (1 - \phi_{j})\theta_{j}(\mathbf{x^{*}}) \right) \left( 1 - \phi_{j} (1 - \theta_{j}(\mathbf{x}^{*})) - (1 - \phi_{j})\theta_{j}(\mathbf{x}^{*}) \right)} \\
+&=& \frac{1}{q^{2}} \sum^{q}_{j=1}{\phi_{j} (1 - \phi_{j})} + \theta_{j}(\mathbf{x}^{*})(1 - \theta_{j}(\mathbf{x}^{*})) + 4\theta_{j}(\mathbf{x}^{*}) \phi_{j} \left( \theta_{j}(\mathbf{x}^{*}) + \phi_{j} - \theta_{j}(\mathbf{x}^{*}) \phi_{j} - 1 \right)
+\end{eqnarray*}
+
+
+\subsection{Mean and variance of the subset 0/1 loss}\label{ss:01}
+
+{\bf Miguel to draft if the results you obtained are correct, as verified by Sherman on 2016/03/21.}
+
+
+
+\section{Nonparametric permutation testing of a multi-label classifier using the worst classifier as baseline}\label{s:testing}
+
+\subsection{Algorithm of the nonparametric permutation test}\label{ss:algorithm}
+
+{\bf Sherman to draft and produce the pseudocode in an algorithmic format.}
+
+1) Simulate a random classifier classifying a test set multiple times to get an empiric distribution of that loss.
+
+2) Train a classifier (e.g. BR+naiveBayes) on a training set and use that classifier on the same test set the random classifier used to get a loss.
+
+3) Compare that loss with the empiric distribution of the random classifier's loss. This can be simply stated as a percentile and can be treated as a p-value.
+
+
+
+\subsection{Experimental studies}\label{ss:experiments}
+
+\subsubsection{Settings: data, classifiers, losses}\label{sss:datasets}
+
+{\bf Drafted by Miguel: first, datasets; then multi-label classifiers compared.  Start with something like: For illustration, we also present some empirical examples of utilising the significance test on several benchmark datasets and popular multi-label classifiers, including BR+NB, BR+logistic, chain classifier+NB, chain classifier+logistic, versus the worst classifier?}
+
+To examine this approach we use three {\bf We can use more if it is necessary; but in principle we only need a small number of datasets to demonstrate clearly the relative goodness of the compared classifiers.} popular multi-label real datasets from \emph{Mulan: A Java Library for Multi-label Learning} website (\url{http://mulan.sourceforge.net/datasets-mlc.html}), namely \texttt{Flags}, \texttt{Scene} and \texttt{Yeast}. These three datasets have been split into training and test sets beforehand. We conducted the experiments using solely the training sets.
+
+\begin{table}[H]
+\caption{Summary of multi-label attributes: $p$ for the number of predictors and $q$ for the number of labels.}
+\centering
+\begin{tabular}{lccc}
+  \hline
+	  & \texttt{Flags} & \texttt{Scene} & \texttt{Yeast} \\ 
+  \hline
+ $p$ & 19 & 294 & 103 \\ 
+ $q$ & 7 & 6 & 14 \\  
+ Cardinality & 3.33 & 1.07 & 4.24\\
+    \hline
+\end{tabular}
+\label{SUMML}
+\end{table}
+
+Table \ref{SUMML} shows the multi-label summary statistics of the training set of our chosen datasets. From this table, we see that \texttt{Scene} has low cardinality, which suggests that we can achieve a good performance if we choose a Binary Relevance (BR) strategy for multi-label classification. Datasets \texttt{Flags} and \texttt{Yeast} may not achieve the same level of performance using BR due to their larger cardinality. For these two datasets, we may find that they might not perform better than the worst classifier if we chose a BR strategy for multi-label classification, specially the \texttt{Flags} dataset.
+
+To carry out the hypothesis tests, we compute both multi-label classifiers in terms of the Hamming losses {\bf and the subset 0/1 loss}. The losses are calculated on the datasets obtained by randomly splitting the dataset into training and testing sets $m = 100$ times. 
+
+{\bf Describe these classifiers: BR+NB, BR+logistic, chain classifier+NB, chain classifier+logistic:\\
+BR+NB: independence assumed in labels; independence assumed between predictors;\\
+BR+logistic: independence assumed in labels; dependence assumed between predictors;\\
+CC+NB: dependence assumed in labels; independence assumed between predictors;\\
+BR+logistic: dependence assumed in labels; dependence assumed between predictors.}
+
+
+
+\subsubsection{Testing on the Hamming loss and classifier comparison}\label{sss:Hamming}
+
+{\bf Sherman to draft by adding the plots for the results and some remarks on the relative performance of the compared classifiers based on the p-values.}
+
+
+\subsubsection{Testing on the subset 0/1 loss  and classifier comparison}\label{sss:01}
+
+{\bf Sherman to draft. Similarly as the above.}
+
+
+
+
+\section{Conclusion}
+
+{\bf Jing-Hao to draft.}  In this short paper, we proposed an objective baseline classifier for the evaluation and comparison of multi-label classifiers.  We call this baseline the worst multi-label classifier.  This classifier predicts the labels of test instances by random guess, based only on the summary statistics from the labels in the training set.  To evaluate a multi-label classifier, we proposed a simple nonparametric permutation test to indicate how significant the classifier is far away from (two-sided) or better than (one-side) than the worst classifier, {\bf Seems better to use `better than' given it is compared with the 'worst'} in terms of the Hamming loss and the subset 0/1 loss, two of the most popular measures of loss in multi-label classification.  For illustration, we also presented some empirical examples of utilising the significance test on several benchmark datasets and popular multi-label classifiers. {\bf BR+NB, BR+logistic, chain classifier+NB, chain classifier+logistic, versus the worst classifier?}
+
+
+\section*{Acknowledgements}
+M. Valencia-Garza gratefully acknowledges a scholarship from Consejo Nacional de Ciencia y Tecnologia (CONACyT).
+
+\bibliographystyle{elsarticle-num}
+\bibliography{MLC-baseline}
+
+\end{document}
