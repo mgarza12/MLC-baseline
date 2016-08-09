@@ -75,24 +75,24 @@ In short, this paper proposes a new and objective baseline multi-label classifie
 
 {\bf Drafted by Miguel.}
 
-The worst classifier predicts labels of previously unseen instances at random. For $q$ labels, the worst classifier model is
+The worst classifier predicts labels of previously unseen instances at random, following a Binary Relevance strategy for multi-label classification. This is, it predicts the values of each label one at a time, independently from the other labels. For $q$ labels, the worst classifier model is
 \begin{equation}\label{WC}
 \hat{Y}^{(i)}_{j} \sim \mathrm{Bernoulli}(\phi_{j}), \quad j = 1,\ldots,q 
 \end{equation}
-This is, the $j$-th label of the $i$-th instance is predicted as positive (i.e. $y^{(i)}_{j}=1$) with probability $\phi_{j}$. Since the worst classifier predicts labels randomly, it is independent from predictors.
+The $j$-th label of the $i$-th instance is predicted as positive (i.e. $y^{(i)}_{j}=1$) with probability $\phi_{j}$. Since the worst classifier predicts labels randomly, it is independent from predictors.
 
 A multi-label data set consists of a matrix of predictors $\mathbf{X} \in \Re^{n \times p}$ and a matrix of labels $\mathbf{Y} \in \{ 0,1 \}^{n \times q}$. We assume that the marginal distribution of each label is given by 
 \begin{equation}
 Y^{(i)}_{j} \sim \mathrm{Bernoulli}(\theta_{j}), \quad j = 1,\ldots,q 
 \end{equation}
-For $n$ observations the joint marginal distribution is $p(Y^{(1)}_{j},\ldots,Y^{(n)}_{j}) = \prod^{n}_{i=1}{Y^{(i)}_{j}}$. Then, the maximum likelihood estimator for $\theta_{j}$ is $\hat{\theta}_{j} = n^{-1} \sum^{n}_{i=1}{y^{(i)}_{j}}$. To make more ad hoc guesses we take $\phi_{j}$ in our worst classifier (\ref{WC}) equal to $\hat{\theta_{j}}$.
+For $n$ observations the joint marginal distribution is $p(Y^{(1)}_{j},\ldots,Y^{(n)}_{j}) = \prod^{n}_{i=1}{p(Y^{(i)}_{j})}$. Then, the maximum likelihood estimator for $\theta_{j}$ is $\hat{\theta}_{j} = n^{-1} \sum^{n}_{i=1}{y^{(i)}_{j}}$. To make more ad hoc guesses we take $\phi_{j}$ in our worst classifier (\ref{WC}) equal to $\hat{\theta_{j}}$.
 
 
 \subsection{Mean and variance of the Hamming loss}\label{ss:Hamming}
 
 {\bf Drafted by Miguel.}
 
-For this paper, we focus on the Hamming loss to assess the performance of the worst classifier and carry out the comparisons with other multi-label classifiers. The Hamming loss is defined as
+For this paper, we focus on two popular losses used to assess multi-label classification performance, namely, the Hamming loss and subset 0/1 loss. The Hamming loss is defined as
 \begin{equation}
 HL = \frac{1}{q} \sum^{q}_{j=1}{\mathbb{I} [\hat{Y}_{j} \neq Y_{j}]}
 \end{equation}
@@ -129,19 +129,57 @@ The variance of the worst classifier's Hamming loss is given by
 
 {\bf Miguel to draft if the results you obtained are correct, as verified by Sherman on 2016/03/21.}
 
+The next multi-label performance measure is the subset 0/1 loss. It is defined as
+
+\begin{equation}
+ZO = 1 - \mathbb{I}\left[ \cap^{q}_{j=1}A_{j} \right]
+\end{equation}
+
+where $A_{j}=\{ \hat{Y}_{j} = Y_{j} \}$ for all $j \in \{ 1,\ldots,q\}$.
+
+For a new observation $\mathbf{x}^{*}$, the worst classifier's expected subset 0/1 loss is given by
+
+\begin{eqnarray*}
+\mu_{0/1} &=& \mathbb{E} \left[ ZO \right] = \mathbb{E} \left[ 1 - \mathbb{I}\left[ \cap^{q}_{j=1}A_{j} \right] \right] \\
+&=& 1 - \mathbb{E} \left[ \mathbb{I}\left[ \cap^{q}_{j=1}A_{j} \right] \right] \\
+&=& 1 - \prod^{q}_{j=1}{ \{ P(\hat{Y}_{j}=1, Y_{j}=1) + P(\hat{Y}_{j}=0, Y_{j}=0) \} } \\
+&=& 1 - \prod^{q}_{j=1}{ \{ \phi_{j} \theta_{j}(\mathbf{x}^{*}) + (1 - \phi_{j})(1 - \theta_{j}(\mathbf{x}^{*})) \} } \\
+&=& 1 - \prod^{q}_{j=1}{ \{ 1 - \theta_{j}(\mathbf{x}^{*}) - \phi_{j} + 2 \phi_{j}\theta_{j}(\mathbf{x}^{*}) \}}
+\end{eqnarray*}
+
+The variance of the worst classifier's subset 0/1 loss is
+
+\begin{eqnarray*}
+	\tau_{0/1} &=& \mathrm{Var} \left( ZO \right) = \mathrm{Var} \left( 1 - \mathbb{I}\left[ \cap^{q}_{j=1}A_{j} \right] \right) \\
+	&=& \prod^{q}_{j=1}{ \{ \left( P(\hat{Y}_{j}=1, Y_{j}=1) + P(\hat{Y}_{j}=0, Y_{j}=0) \right) \left( 1 - P(\hat{Y}_{j}=1, Y_{j}=1) - P(\hat{Y}_{j}=0, Y_{j}=0) \right) \} } \\
+	&=& \prod^{q}_{j=1}{ \left \{ \left( \theta_{j}(\mathbf{x}^{*}) + \phi_{j} - 2 \phi_{j}\theta_{j}(\mathbf{x}^{*})  \right) \left( 1 - \left[ \theta_{j}(\mathbf{x}^{*}) + \phi_{j} - 2 \phi_{j}\theta_{j}(\mathbf{x}^{*}) \right] \right) \right \} }
+\end{eqnarray*}
 
 
 \section{Nonparametric permutation testing of a multi-label classifier using the worst classifier as baseline}\label{s:testing}
 
 \subsection{Algorithm of the nonparametric permutation test}\label{ss:algorithm}
 
-{\bf Sherman to draft and produce the pseudocode in an algorithmic format.}
+In multi-label classification, a classifier is trained using a training set. 
+To assess how well the classifier performs, it is given an independent test set to classify on, and metrics such as the Hamming loss and the subset 0/1 loss can be used to compare the performances of different classifiers. 
 
-1) Simulate a random classifier classifying a test set multiple times to get an empiric distribution of that loss.
+For such comparison, it is appealing to have a baseline classifier, especially for imbalanced data. For example consider a dataset with extremely high label density, e.g.~99\%. A classifier which always predict positive labels will have a Hamming loss of about 1\%. Without knowing the label density, quoting the Hamming loss of 1\% is meaningless and can be deceiving.
 
-2) Train a classifier (e.g. BR+naiveBayes) on a training set and use that classifier on the same test set the random classifier used to get a loss.
+The random (worst) classifier can be used as a baseline classifier . 
+For label $j$, this classifier predicts positive labels with probability $\phi_j$, where $\phi_j$ is the label density of the training set. 
+Because the random classifier does not use any information in the feature space, it makes a very poor attempt in machine learning, thus such a classifier makes a good base line.
+This baseline, no matter which metric to adopt, can be computed approximately using Monte Carlo to simulate the random classifier classifying the test set, given a training set. The Monte Carlo algorithm is described as follows
+\begin{enumerate}
+	\item Obtain the label density $\phi_j$ for label $j$ in the training set.
+	\item The random classifier classifies label $j$ as positive with probability $\phi_j$. Simulate the random classifier classifying a test set multiple times to get an empiric distribution of the adopted metric of loss.
+	\item Train a classifier (e.g.~naive Bayes) on a training set.
+	\item Use that classifier on the same test set the random classifier used to get a loss.
+	\item Compare that loss with the empiric distribution of the random classifier's loss. This can be simply stated as a percentile and can be treated as a $p$-value.
+\end{enumerate}
+{\bf Sherman: Can you write the algorithm above as pseudocode in an algorithmic format of LaTeX.}
 
-3) Compare that loss with the empiric distribution of the random classifier's loss. This can be simply stated as a percentile and can be treated as a p-value.
+Even though this method is approximate, simulating the random classifier is extremely cheap thus can be repeated many many times, making the empiric distribution as accurate as possible.
+
 
 
 
@@ -149,9 +187,11 @@ The variance of the worst classifier's Hamming loss is given by
 
 \subsubsection{Settings: data, classifiers, losses}\label{sss:datasets}
 
-{\bf Drafted by Miguel: first, datasets; then multi-label classifiers compared.  Start with something like: For illustration, we also present some empirical examples of utilising the significance test on several benchmark datasets and popular multi-label classifiers, including BR+NB, BR+logistic, chain classifier+NB, chain classifier+logistic, versus the worst classifier?}
+{\bf Drafted by Miguel}
 
-To examine this approach we use three {\bf We can use more if it is necessary; but in principle we only need a small number of datasets to demonstrate clearly the relative goodness of the compared classifiers.} popular multi-label real datasets from \emph{Mulan: A Java Library for Multi-label Learning} website (\url{http://mulan.sourceforge.net/datasets-mlc.html}), namely \texttt{Flags}, \texttt{Scene} and \texttt{Yeast}. These three datasets have been split into training and test sets beforehand. We conducted the experiments using solely the training sets.
+To illustrate this approach, we present some empirical examples of utilising the significance test on benchmark multi-label datasets. We compare the performance of the worst classifier against four popular multi-label classifiers, namely Binary Relevance nai\"ive Bayes (BR+NB), Binary relevance logistic regression (BR+LR), chain classifier na\"ive Bayes (CC+NB) and chain classifier logistic regression (CC+LR).
+
+We use three popular multi-label real datasets from \emph{Mulan: A Java Library for Multi-label Learning} website (\url{http://mulan.sourceforge.net/datasets-mlc.html}), namely \texttt{Flags}, \texttt{Scene} and \texttt{Yeast}. These three datasets have been split into training and test sets beforehand. We conducted the experiments using solely the training sets.
 
 \begin{table}[H]
 \caption{Summary of multi-label attributes: $p$ for the number of predictors and $q$ for the number of labels.}
@@ -163,27 +203,36 @@ To examine this approach we use three {\bf We can use more if it is necessary; b
  $p$ & 19 & 294 & 103 \\ 
  $q$ & 7 & 6 & 14 \\  
  Cardinality & 3.33 & 1.07 & 4.24\\
+ Density & 0.48 & 0.18 & 0.30 \\
     \hline
 \end{tabular}
 \label{SUMML}
 \end{table}
 
-Table \ref{SUMML} shows the multi-label summary statistics of the training set of our chosen datasets. From this table, we see that \texttt{Scene} has low cardinality, which suggests that we can achieve a good performance if we choose a Binary Relevance (BR) strategy for multi-label classification. Datasets \texttt{Flags} and \texttt{Yeast} may not achieve the same level of performance using BR due to their larger cardinality. For these two datasets, we may find that they might not perform better than the worst classifier if we chose a BR strategy for multi-label classification, specially the \texttt{Flags} dataset.
+Table \ref{SUMML} shows the multi-label summary statistics of the training set of our chosen datasets. From this table, we see that \texttt{Scene} has low cardinality, which suggests that we can achieve a good performance if we choose a Binary Relevance (BR) strategy for multi-label classification. Datasets \texttt{Flags} and \texttt{Yeast} may not achieve the same level of performance using BR due to their larger cardinality, so a chain classifier (CC) might be a more suitable option. For these two datasets, we may find that they might not perform better than the worst classifier if we chose a BR strategy for multi-label classification, specially the \texttt{Flags} dataset.
 
-To carry out the hypothesis tests, we compute both multi-label classifiers in terms of the Hamming losses {\bf and the subset 0/1 loss}. The losses are calculated on the datasets obtained by randomly splitting the dataset into training and testing sets $m = 100$ times. 
+To carry out the hypothesis tests, we compute measure the Hamming and subset 0/1 losses of the selected multi-label classifiers and the worst classifier. The losses are calculated on the datasets obtained by randomly splitting the dataset into training and testing sets $m = 100$ times. 
 
-{\bf Describe these classifiers: BR+NB, BR+logistic, chain classifier+NB, chain classifier+logistic:\\
-BR+NB: independence assumed in labels; independence assumed between predictors;\\
-BR+logistic: independence assumed in labels; dependence assumed between predictors;\\
-CC+NB: dependence assumed in labels; independence assumed between predictors;\\
-BR+logistic: dependence assumed in labels; dependence assumed between predictors.}
+The classifiers that we use are divided into two categories
 
-
+\begin{description}
+	\item[Binary relevance] This multi-label classification strategy assumes that labels are conditionally independent; i.e.
+	\begin{equation}
+	p(Y_{1},\ldots,Y_{q}|X) = \prod^{q}_{j=1}{p(Y_{j}|X)}
+	\end{equation}
+	This means that $q$ independent models (one for each label) are trained and used to predict the value of each label independently. Since each model corresponds to a single-label binary classifier we can choose any \emph{off-the-shelf} classifier as base model to carry out the classification. For our examples, we choose na\"ive Bayes and logistic regression as base classifiers for our Binary Relevance strategy.
+	\item[Chain classifier] This multi-label classification strategy assumes that labels are conditionally dependent and their joint conditional distribution is given by 
+	\begin{equation}\label{CC}
+	p(Y_{1},\ldots,Y_{q}|X) = p(Y_{1}|X)p(Y_{2}|X,Y_{1})\cdots p(Y_{q}|X,Y_{1},\ldots,Y_{q-1})
+	\end{equation}
+	This decomposition follows the product rule of probability and allows to see each factor as a single-label binary classifier. Then, we can choose any base model to perform the predictions for each factor. Although the order in (\ref{CC}) is unimportant in terms of having a valid joint distribution; in the context of multi-label learning, the label ordering in the factorisation affects the testing/prediction phase. A way to overcome this drawback, is to use an ensemble of chain classifiers~\citep{OCC,PCC} in which each component of the ensemble uses a different ordering. For our examples, we use only one chain classifier with a fixed label ordering. Since we aim to illustrate our baseline classifier along with the significance test approach for comparison, we give a label order and leave the classification performance improvement aside.
+\end{description}
 
 \subsubsection{Testing on the Hamming loss and classifier comparison}\label{sss:Hamming}
 
 {\bf Sherman to draft by adding the plots for the results and some remarks on the relative performance of the compared classifiers based on the p-values.}
 
+The Naive Bayes should be used on datasets with different label densities, recording the Hamming loss and the subset 0/1 loss. These metrics then should be compared with the empiric distribution of the random classifier, quoted as a percentile. This experiment should be repeated $K$ times by shuffling around the data to and from the training and test set, for example $K$-folds, to put error bars to such percentiles.
 
 \subsubsection{Testing on the subset 0/1 loss  and classifier comparison}\label{sss:01}
 
@@ -198,7 +247,7 @@ BR+logistic: dependence assumed in labels; dependence assumed between predictors
 
 
 \section*{Acknowledgements}
-M. Valencia-Garza gratefully acknowledges a scholarship from Consejo Nacional de Ciencia y Tecnologia (CONACyT).
+M. Valencia Garza gratefully acknowledges a scholarship from Consejo Nacional de Ciencia y Tecnologia (CONACyT).
 
 \bibliographystyle{elsarticle-num}
 \bibliography{MLC-baseline}
